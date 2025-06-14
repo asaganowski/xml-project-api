@@ -52,6 +52,35 @@ class XmlController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    // Dodane: wyszukiwanie po XPath
+    async searchByXPath(req, res) {
+        try {
+            const { xpath } = req.query;
+            if (!xpath) {
+                return res.status(400).json({ message: "XPath query is required" });
+            }
+            const results = await this.xmlService.searchByXPath(xpath);
+            res.status(200).json(results);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    // Dodane: modyfikacja węzła/atrybutu po XPath
+    async modifyNodeByXPath(req, res) {
+        try {
+            const { id } = req.params;
+            const { xpath, newValue } = req.body;
+            if (!xpath || typeof newValue === 'undefined') {
+                return res.status(400).json({ message: "XPath and newValue are required" });
+            }
+            const result = await this.xmlService.modifyNodeByXPath(id, xpath, newValue);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 export default XmlController;

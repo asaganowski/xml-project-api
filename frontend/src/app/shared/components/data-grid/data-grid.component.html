@@ -1,7 +1,7 @@
 <app-loading></app-loading>
-@if(data$ | async) {}
+<!-- @if(data$ | async) {} -->
 
-<ng-container *ngIf="visibleData as data">
+<ng-container *ngIf="data">
   <div class="table-wrapper">
     <div class="table-container">
       <table mat-table [dataSource]="data" multiTemplateDataRows class="mat-elevation-z8">

@@ -1,1 +1,59 @@
-<p>xml-form works!</p>
+<app-modal-view [title]="xml ? 'Edytuj dokument XML' : 'Dodaj dokument XML'">
+  <div class="xml-form">
+    <form [formGroup]="xmlForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="xmlInput">Treść dokumentu XML</label>
+        <textarea
+          id="xmlInput"
+          formControlName="xmlContent"
+          rows="10"
+          class="form-control"
+          placeholder="Wklej tutaj dokument XML"
+        ></textarea>
+      </div>
+      <div *ngIf="xmlForm.controls['xmlContent'].invalid && xmlForm.controls['xmlContent'].touched" class="text-danger">
+        Dokument XML jest wymagany.
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="xmlForm.invalid">
+        {{ xml ? 'Zapisz zmiany' : 'Dodaj' }}
+      </button>
+    </form>
+    <hr>
+    <form [formGroup]="xpathForm" (ngSubmit)="onSearchByXPath()" class="mt-3">
+      <div class="form-group">
+        <label for="xpathInput">Wyszukaj fragment przez XPath</label>
+        <input
+          id="xpathInput"
+          formControlName="xpath"
+          type="text"
+          class="form-control"
+          placeholder="Np. //element[@atrybut='wartość']"
+        />
+      </div>
+      <button type="submit" class="btn btn-secondary" [disabled]="xpathForm.invalid">Wyszukaj</button>
+    </form>
+    <form [formGroup]="modifyNodeForm" (ngSubmit)="onModifyNodeByXPath()" class="mt-3">
+      <div class="form-group">
+        <label for="modifyXpathInput">XPath do modyfikacji</label>
+        <input
+          id="modifyXpathInput"
+          formControlName="xpath"
+          type="text"
+          class="form-control"
+          placeholder="XPath do węzła/atrybutu"
+        />
+      </div>
+      <div class="form-group">
+        <label for="newValueInput">Nowa wartość</label>
+        <input
+          id="newValueInput"
+          formControlName="newValue"
+          type="text"
+          class="form-control"
+          placeholder="Nowa wartość węzła/atrybutu"
+        />
+      </div>
+      <button type="submit" class="btn btn-warning" [disabled]="modifyNodeForm.invalid">Modyfikuj</button>
+    </form>
+  </div>
+</app-modal-view>

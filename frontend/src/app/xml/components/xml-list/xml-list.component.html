@@ -1,12 +1,94 @@
-<app-list-view [title]="'Lista dokument XML'">
-    <!-- <app-data-grid
-        [changedColumnHeaderNames]="changedColumnHeaderNames"
-        [data$]="data$"
-        [displayedColumns]="displayedColumns"
-        [rowButtonAction]="rowButtonAction"
-        [searchQuery]="searchQuery"
-        [displayedColumnSettings]="displayedColumnSettings"
-        [searchKey]="'name'"
-    ></app-data-grid> -->
+<form (ngSubmit)="onXPathSearch()">
+  <input type="text" [(ngModel)]="xpathQuery" name="xpathQuery" placeholder="Wpisz XPath" required>
+  <button type="submit">Szukaj XPath</button>
+</form>
+
+<app-list-view [title]="'Lista dokumentów XML'">
+  <!-- Wyszukiwanie tekstowe -->
+  <form class="mb-3" (ngSubmit)="onSearch()">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      name="searchQuery"
+      placeholder="Wyszukaj po treści"
+      class="form-control d-inline-block w-auto mr-2"
+    />
+    <button type="submit" class="btn btn-primary">Szukaj</button>
+  </form>
+
+  <!-- Wyszukiwanie przez XPath -->
+  <form class="mb-3" (ngSubmit)="onXPathSearch()">
+    <input
+      type="text"
+      [(ngModel)]="xpathQuery"
+      name="xpathQuery"
+      placeholder="Wpisz XPath, np. //element[@atrybut='wartość']"
+      class="form-control d-inline-block w-auto mr-2"
+      required
+    />
+    <button type="submit" class="btn btn-secondary">Szukaj XPath</button>
+  </form>
+
+  <!-- Dodawanie/edycja dokumentu XML -->
+  <button class="btn btn-success mb-3" (click)="openXmlForm()">Dodaj dokument XML</button>
+  <app-xml-form
+    *ngIf="showXmlForm"
+    [xml]="selectedXml"
+    (submitXml)="onSaveXml($event)"
+    (close)="closeXmlForm()"
+  ></app-xml-form>
+
+  <!-- Modyfikacja węzła/atrybutu przez XPath -->
+  <form class="mb-3" (ngSubmit)="onModifyNodeByXPath()">
+    <div class="form-row">
+      <div class="col">
+        <input
+          type="text"
+          [(ngModel)]="modifyXpath"
+          name="modifyXpath"
+          placeholder="XPath do modyfikacji"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="col">
+        <input
+          type="text"
+          [(ngModel)]="newValue"
+          name="newValue"
+          placeholder="Nowa wartość"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="col">
+        <select
+          [(ngModel)]="selectedXmlId"
+          name="selectedXmlId"
+          class="form-control"
+          required
+        >
+          <option [ngValue]="null" disabled selected>Wybierz dokument</option>
+          <option *ngFor="let doc of xmlDocuments" [ngValue]="doc.id">
+            Dokument #{{ doc.id }}
+          </option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-warning">Modyfikuj przez XPath</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Lista dokumentów -->
+  <app-data-grid
+    [changedColumnHeaderNames]="changedColumnHeaderNames"
+    [data]="xmlDocuments"
+    [displayedColumns]="displayedColumns"
+    [rowButtonAction]="rowButtonAction"
+    [searchQuery]="searchQuery"
+    [displayedColumnSettings]="displayedColumnSettings"
+    [searchKey]="'name'"
+  ></app-data-grid>
 </app-list-view>
 <app-loading></app-loading>

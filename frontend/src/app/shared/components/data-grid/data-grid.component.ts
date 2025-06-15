@@ -57,7 +57,7 @@ export class DataGridComponent<T> implements OnInit, OnChanges{
   // };
 
   @Input()
-  data$: Observable<T[]> = of([]);
+  data: T[] = [];
 
   @Input()
   changedColumnHeaderNames: { [key: string]: string } = {};
@@ -107,13 +107,13 @@ export class DataGridComponent<T> implements OnInit, OnChanges{
         
     // );
 
-    this.data$ = this.data$?.pipe(
-          this._loadingService.showLoaderUntilCompleted(),
-          tap(data => {
-            this.originalData = data;
-            this.visibleData = data;
-          })
-        )
+    // this.data$ = this.data$?.pipe(
+    //       this._loadingService.showLoaderUntilCompleted(),
+    //       tap(data => {
+    //         this.originalData = data;
+    //         this.visibleData = data;
+    //       })
+    //     )
 
     // setTimeout(()=>this.refresh(),5000)
 

@@ -27,12 +27,33 @@ class XmlService {
         return result.rowsAffected[0] > 0;
     }
 
+    async searchByXPath(xpath) {
+        await sql.connect(config);
+        const result = await sql.query`
+            SELECT Id, XmlContent.query(${xpath}) AS ResultFragment
+            FROM XmlDocuments
+            WHERE XmlContent.exist(${xpath}) = 1
+        `;
+        return result.recordset;
+    }
+
     async searchXml(query) {
         await sql.connect(config);
         const result = await sql.query`
             SELECT * FROM XmlDocuments WHERE XmlContent LIKE ${'%' + query + '%'}
         `;
         return result.recordset;
+    }
+
+    async modifyNodeByXPath(id, xpath, newValue) {
+        await sql.connect(config);
+        const result = await sql.query`
+            UPDATE XmlDocuments
+            SET XmlContent.modify('replace value of (${xpath}) with ("${newValue}")')
+            OUTPUT INSERTED.*
+            WHERE Id = ${id}
+        `;
+        return result.recordset[0];
     }
 
     async modifyXml(id, updatedData) {

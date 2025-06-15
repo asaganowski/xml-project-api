@@ -8,8 +8,13 @@ const xmlController = new XmlController(xmlService);
 
 router.post('/save', xmlController.saveXml.bind(xmlController));
 router.delete('/delete/:id', xmlController.deleteXml.bind(xmlController));
-router.get('/search', xmlController.searchXml.bind(xmlController));
-router.put('/modify/:id', xmlController.modifyXml.bind(xmlController));
 router.get('/all', xmlController.getAllXml.bind(xmlController));
+router.get('/searchByXPath', xmlController.searchByXPath.bind(xmlController));
+router.post('/insert-node', xmlController.insertNode.bind(xmlController));
+router.post('/delete-node', xmlController.deleteNode.bind(xmlController));
+router.post('/replace-value', xmlController.replaceNodeValue.bind(xmlController));
+router.post('/insert-attribute', xmlController.insertAttribute.bind(xmlController));
+router.post('/delete-attribute', xmlController.deleteAttribute.bind(xmlController));
+
 
 export default router;

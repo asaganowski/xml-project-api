@@ -2,3 +2,8 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+textarea, input, select {
+    width: 100%;
+    padding: 10px 0px 10px 10px;
+}

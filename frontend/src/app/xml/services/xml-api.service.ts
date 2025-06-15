@@ -6,38 +6,49 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class XmlService {
-  private apiUrl = 'http://localhost:3000/api/xml';
+  private apiUrl = 'http://localhost:5000/api/xml';
 
   constructor(private http: HttpClient) {}
 
   getAllXml(): Observable<any> {
-    return this.http.get(`${this.apiUrl}`);
+    return this.http.get(`${this.apiUrl}/all`);
   }
 
   saveXml(xmlData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, xmlData);
+    return this.http.post(`${this.apiUrl}/save`, xmlData);
   }
 
-  deleteXml(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
-
-  searchXml(query: string): Observable<any> {
-    const params = new HttpParams().set('query', query);
-    return this.http.get(`${this.apiUrl}/search`, { params });
-  }
-
-  modifyXml(id: string, xmlData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, xmlData);
+  deleteXml(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/${id}`);
   }
 
   searchByXPath(xpath: string): Observable<any> {
     const params = new HttpParams().set('xpath', xpath);
-    return this.http.get(`${this.apiUrl}/xpath`, { params });
+    return this.http.get(`${this.apiUrl}/searchByXPath`, { params });
   }
 
-  modifyNodeByXPath(id: string, xpath: string, newValue: string): Observable<any> {
+  modifyNodeByXPath(id: number, xpath: string, newValue: string): Observable<any> {
     const body = { xpath, newValue };
-    return this.http.put(`${this.apiUrl}/xpath/${id}`, body);
+    return this.http.put(`${this.apiUrl}/modify/${id}`, body);
+  }
+
+  insertNode(data: { id: number; xpath: string; newNodeXml: string; position: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/insert-node`, data);
+  }
+
+  deleteNode(data: { id: number; xpath: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/delete-node`, data);
+  }
+
+  replaceValue(data: { id: number; xpath: string; newValue: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/replace-value`, data);
+  }
+
+  insertAttribute(data: { id: number; xpath: string; attributeName: string; value: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/insert-attribute`, data);
+  }
+
+  deleteAttribute(data: { id: number; xpath: string; attributeName: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/delete-attribute`, data);
   }
 }

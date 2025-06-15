@@ -1,12 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { LoadingComponent } from '../../../shared/components/loading/loading.component';
-import { DataGridComponent } from '../../../shared/components/data-grid/data-grid.component';
+import { DataGridComponent, TABLE_ACTION_KEY, TableAction } from '../../../shared/components/data-grid/data-grid.component';
 import { ListViewComponent } from '../../../shared/components/list-view/list-view.component';
-import { LoadingService } from '../../../shared/services/loading/loading.service';
-import { XmlService } from '../../../shared/services/xml/xml.service';
+import { TableColumnNames, ChangedTableColumnNames } from '../../../shared/models/tableColumn.type';
+import { XmlService } from '../../services/xml-api.service';
+import { XmlFormComponent } from '../xml-form/xml-form.component';
+import { FormsModule } from '@angular/forms';
+
+export interface XMLDocumentsListModel {
+  Id: number;
+  Name: string;
+  Content: XMLDocument;
+  MatchedFragment: string;
+}
 
 @Component({
   selector: 'app-xml-list',
@@ -16,10 +23,9 @@ import { XmlService } from '../../../shared/services/xml/xml.service';
     ListViewComponent,
     MatDialogModule,
     CommonModule,
-    LoadingComponent
+    FormsModule
   ],
   providers: [
-    LoadingService,
     XmlService
   ],
   templateUrl: './xml-list.component.html',
@@ -37,68 +43,30 @@ export class XmlListComponent implements OnInit {
 
   constructor(
     private xmlService: XmlService,
-    private matDialog: MatDialog,
-    private _loadingService: LoadingService,
-    private _authService: AuthService) { }
+    private matDialog: MatDialog) { }
 
   ngOnInit(): void {
     this.loadXmlDocuments();
   }
 
   loadXmlDocuments() {
-    this.xmlService.getAllXml().subscribe(docs => {
+    this.xmlService.getAllXml().subscribe((docs: any) => {
       this.xmlDocuments = docs;
     });
   }
 
-  onSearch() {
-    if (!this.searchQuery) {
+  onXPathSearch() {
+    if (!this.xpathQuery) {
       this.loadXmlDocuments();
       return;
     }
-    this.xmlService.searchXml(this.searchQuery).subscribe(results => {
-      this.xmlDocuments = results;
-    });
-  }
 
-  onXPathSearch() {
-    if (!this.xpathQuery) return;
     this.xmlService.searchByXPath(this.xpathQuery).subscribe(results => {
       this.xmlDocuments = results;
     });
   }
 
-  openXmlForm() {
-    this.selectedXml = null;
-    this.showXmlForm = true;
-  }
-
-  closeXmlForm() {
-    this.showXmlForm = false;
-    this.selectedXml = null;
-  }
-
-  onSaveXml(xmlContent: string) {
-    if (this.selectedXml) {
-      this.xmlService.modifyXml(this.selectedXml.id, { XmlContent: xmlContent }).subscribe(() => {
-        this.loadXmlDocuments();
-        this.closeXmlForm();
-      });
-    } else {
-      // Dodawanie
-      this.xmlService.saveXml({ XmlContent: xmlContent }).subscribe(() => {
-        this.loadXmlDocuments();
-        this.closeXmlForm();
-      });
-    }
-  }
-
-  editXml(row: any) {
-    this.selectedXml = row;
-    this.showXmlForm = true;
-  }
-
-  deleteXml(id: string) {
+  deleteXml(id: number) {
     if (confirm('Czy na pewno chcesz usunąć ten dokument?')) {
       this.xmlService.deleteXml(id).subscribe(() => {
         this.loadXmlDocuments();
@@ -106,28 +74,38 @@ export class XmlListComponent implements OnInit {
     }
   }
 
-  onModifyNodeByXPath() {
-    if (!this.selectedXmlId || !this.modifyXpath || typeof this.newValue === 'undefined') return;
-    this.xmlService.modifyNodeByXPath(this.selectedXmlId, this.modifyXpath, this.newValue).subscribe(() => {
+  private openDialog(el: XMLDocumentsListModel | undefined){
+    const questionDialogRef = this.matDialog.open(XmlFormComponent, {
+      data: el,
+      minWidth: '90vw'
+    })
+
+    questionDialogRef.afterClosed().subscribe(el => {
       this.loadXmlDocuments();
-      this.modifyXpath = '';
-      this.newValue = '';
-      this.selectedXmlId = null;
-    });
+    })
   }
 
-  displayedColumns: TableColumnNames<EventDto> = ['Id', 'Name', 'Content'];
+  onModifyNodeByXPath(el: XMLDocumentsListModel | undefined) {
+    this.openDialog(el);
+  }
 
-  changedColumnHeaderNames: ChangedTableColumnNames<EventDto> = {
+  onAddNew(){
+    this.openDialog(undefined);
+  }
+
+  displayedColumns: TableColumnNames<XMLDocumentsListModel> = ['Id', 'Name', 'Content', 'MatchedFragment'];
+
+  changedColumnHeaderNames: ChangedTableColumnNames<XMLDocumentsListModel> = {
     Id: 'Id',
     Name: 'Nazwa',
     Content: 'Treść',
+    MatchedFragment: 'XPath'
   }
 
-  rowButtonAction: TableAction<EventDto>[] = [
-    { key: TABLE_ACTION_KEY.ADD, name: "Kup bilet", icon: "add", color: "button-green", availabilityFn: el => !!el, callback: (el) => this.onSaveXml(el!) },
-    { key: TABLE_ACTION_KEY.EDIT, name: "Edytuj", icon: "edit", color: "button-yellow", availabilityFn: el => !!el, callback: () => { } },
-    { key: TABLE_ACTION_KEY.DELETE, name: "Usuń", icon: "delete", color: "button-red", availabilityFn: el => el?.location != 'Krk', callback: el => this.onDeleteClicked(el!) },
+  rowButtonAction: TableAction<XMLDocumentsListModel>[] = [
+    { key: TABLE_ACTION_KEY.ADD, name: "Dodaj nowy", icon: "add", color: "button-green", availabilityFn: el => true, callback: (el) => this.onAddNew() },
+    { key: TABLE_ACTION_KEY.EDIT, name: "Edytuj", icon: "edit", color: "button-yellow", availabilityFn: el => !!el, callback: (el) => this.onModifyNodeByXPath(el) },
+    { key: TABLE_ACTION_KEY.DELETE, name: "Usuń", icon: "delete", color: "button-red", availabilityFn: el => !!el, callback: el => this.deleteXml(el?.Id!) },
   ]
 
 }

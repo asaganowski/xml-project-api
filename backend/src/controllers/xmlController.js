@@ -1,3 +1,4 @@
+
 class XmlController {
     constructor(xmlService) {
         this.xmlService = xmlService;
@@ -14,8 +15,13 @@ class XmlController {
 
     async saveXml(req, res) {
         try {
-            const xmlData = req.body;
-            const result = await this.xmlService.saveXml(xmlData);
+            const { name, xmlContent } = req.body;
+
+            if (!name || !xmlContent) {
+            return res.status(400).json({ message: "Nazwa i dokument XML są wymagane." });
+            }
+
+            const result = await this.xmlService.saveXml({ name, xmlContent });
             res.status(201).json(result);
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -27,27 +33,6 @@ class XmlController {
             const { id } = req.params;
             await this.xmlService.deleteXml(id);
             res.status(204).send();
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    async searchXml(req, res) {
-        try {
-            const { query } = req.query;
-            const results = await this.xmlService.searchXml(query);
-            res.status(200).json(results);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    async modifyXml(req, res) {
-        try {
-            const { id } = req.params;
-            const xmlData = req.body;
-            const result = await this.xmlService.modifyXml(id, xmlData);
-            res.status(200).json(result);
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
@@ -67,15 +52,45 @@ class XmlController {
         }
     }
 
-    // Dodane: modyfikacja węzła/atrybutu po XPath
-    async modifyNodeByXPath(req, res) {
+      async insertNode(req, res) {
         try {
-            const { id } = req.params;
-            const { xpath, newValue } = req.body;
-            if (!xpath || typeof newValue === 'undefined') {
-                return res.status(400).json({ message: "XPath and newValue are required" });
-            }
-            const result = await this.xmlService.modifyNodeByXPath(id, xpath, newValue);
+            const result = await this.xmlService.insertNode(req.body);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    async deleteNode(req, res) {
+        try {
+            const result = await this.xmlService.deleteNode(req.body);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    async replaceNodeValue(req, res) {
+        try {
+            const result = await this.xmlService.replaceNodeValue(req.body);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    async insertAttribute(req, res) {
+        try {
+            const result = await this.xmlService.insertAttribute(req.body);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    async deleteAttribute(req, res) {
+        try {
+            const result = await this.xmlService.deleteAttribute(req.body);
             res.status(200).json(result);
         } catch (error) {
             res.status(500).json({ message: error.message });
